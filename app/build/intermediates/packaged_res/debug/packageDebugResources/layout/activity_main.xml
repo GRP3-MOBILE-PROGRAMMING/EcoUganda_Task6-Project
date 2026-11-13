@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F3F6F1">
+
+ <!-- GREEN HEADER ON EVERY PAGE -->
+ <LinearLayout
+     android:layout_width="match_parent"
+     android:layout_height="56dp"
+     android:orientation="horizontal"
+     android:gravity="center_vertical"
+     android:background="#14543A">
+
+  <TextView
+      android:id="@+id/menu_toggle"
+      android:layout_width="56dp"
+      android:layout_height="match_parent"
+      android:gravity="center"
+      android:text="☰"
+      android:textSize="25sp"
+      android:textColor="#FFFFFF"/>
+
+  <TextView
+      android:id="@+id/screen_title"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center_vertical"
+      android:text="EcoUganda Dashboard"
+      android:textColor="#FFFFFF"
+      android:textSize="18sp"
+      android:textStyle="bold"
+      android:paddingStart="8dp"/>
+ </LinearLayout>
+
+ <!-- PAGE CONTENT AND DRAWER -->
+ <FrameLayout
+     android:layout_width="match_parent"
+     android:layout_height="0dp"
+     android:layout_weight="1">
+
+  <FrameLayout
+      android:id="@+id/page_container"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"/>
+
+  <!-- DRAWER BACKGROUND -->
+  <View
+      android:id="@+id/drawer_scrim"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="#99000000"
+      android:visibility="gone"/>
+
+  <!-- NAVIGATION DRAWER -->
+  <LinearLayout
+      android:id="@+id/mobile_drawer"
+      android:layout_width="290dp"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:background="#FFFFFF"
+      android:elevation="12dp"
+      android:visibility="gone">
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="190dp"
+       android:orientation="vertical"
+       android:gravity="bottom"
+       android:padding="22dp"
+       android:background="#14543A">
+
+    <TextView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:text="E"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#14543A"
+        android:background="#DDEDE0"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="EcoUganda"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GREEN NAVIGATOR"
+        android:textSize="11sp"
+        android:textColor="#DDEDE0"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="NEMA • UREA • NGO partners"
+        android:textSize="11sp"
+        android:textColor="#FFFFFF"/>
+   </LinearLayout>
+
+   <TextView
+       android:id="@+id/nav_dashboard"
+       android:layout_width="match_parent"
+       android:layout_height="55dp"
+       android:gravity="center_vertical"
+       android:paddingStart="24dp"
+       android:text="⌂   Dashboard"
+       android:textColor="#263B30"
+       android:textSize="15sp"/>
+
+   <TextView
+       android:id="@+id/nav_projects"
+       android:layout_width="match_parent"
+       android:layout_height="55dp"
+       android:gravity="center_vertical"
+       android:paddingStart="24dp"
+       android:text="▦   Projects"
+       android:textColor="#263B30"
+       android:textSize="15sp"/>
+
+   <TextView
+       android:id="@+id/nav_schools"
+       android:layout_width="match_parent"
+       android:layout_height="55dp"
+       android:gravity="center_vertical"
+       android:paddingStart="24dp"
+       android:text="♧   Green Schools"
+       android:textColor="#263B30"
+       android:textSize="15sp"/>
+
+   <TextView
+       android:id="@+id/nav_reports"
+       android:layout_width="match_parent"
+       android:layout_height="55dp"
+       android:gravity="center_vertical"
+       android:paddingStart="24dp"
+       android:text="▤   Districts / Reports"
+       android:textColor="#263B30"
+       android:textSize="15sp"/>
+
+   <TextView
+       android:id="@+id/nav_settings"
+       android:layout_width="match_parent"
+       android:layout_height="55dp"
+       android:gravity="center_vertical"
+       android:paddingStart="24dp"
+       android:text="⚙   Settings"
+       android:textColor="#263B30"
+       android:textSize="15sp"/>
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_margin="22dp"
+       android:layout_marginTop="35dp"
+       android:text="Offline sync: enabled"
+       android:textColor="#819087"
+       android:textSize="12sp"/>
+  </LinearLayout>
+
+ </FrameLayout>
+
+ <!-- BOTTOM NAVIGATION -->
+ <LinearLayout
+     android:layout_width="match_parent"
+     android:layout_height="68dp"
+     android:orientation="horizontal"
+     android:gravity="center_vertical"
+     android:background="#FFFFFF">
+
+  <LinearLayout
+      android:id="@+id/bottom_home"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:orientation="vertical">
+
+   <ImageView
+       android:layout_width="25dp"
+       android:layout_height="25dp"
+       android:src="@drawable/ic_home"
+       android:tint="#14543A"/>
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Home"
+       android:textColor="#14543A"
+       android:textSize="11sp"/>
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/bottom_projects"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:orientation="vertical">
+
+   <ImageView
+       android:layout_width="25dp"
+       android:layout_height="25dp"
+       android:src="@drawable/ic_projects"
+       android:tint="#718078"/>
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Projects"
+       android:textColor="#718078"
+       android:textSize="11sp"/>
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/bottom_schools"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:orientation="vertical">
+
+   <ImageView
+       android:layout_width="25dp"
+       android:layout_height="25dp"
+       android:src="@drawable/ic_schools"
+       android:tint="#718078"/>
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Schools"
+       android:textColor="#718078"
+       android:textSize="11sp"/>
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/bottom_reports"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:orientation="vertical">
+
+   <ImageView
+       android:layout_width="25dp"
+       android:layout_height="25dp"
+       android:src="@drawable/ic_reports"
+       android:tint="#718078"/>
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Reports"
+       android:textColor="#718078"
+       android:textSize="11sp"/>
+  </LinearLayout>
+
+ </LinearLayout>
+
+</LinearLayout>

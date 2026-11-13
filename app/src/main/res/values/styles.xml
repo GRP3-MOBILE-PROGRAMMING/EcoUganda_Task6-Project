@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.EcoUganda" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/eco_green</item>
+        <item name="android:statusBarColor">@color/eco_green_dark</item>
+        <item name="android:navigationBarColor">@color/eco_white</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/eco_background</item>
+    </style>
+</resources>

@@ -1,0 +1,7 @@
+plugins { id 'com.android.application' }
+android {
+ namespace 'com.example.ecouganda'
+ compileSdk 35
+ defaultConfig { applicationId 'com.example.ecouganda'; minSdk 23; targetSdk 34; versionCode 1; versionName '1.0' }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_11; targetCompatibility JavaVersion.VERSION_11 }
+}
