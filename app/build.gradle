@@ -1,4 +1,19 @@
-plugins { id 'com.android.application' }
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'      // reads app/google-services.json
+    id 'com.google.firebase.firebase-perf'   // auto HTTP + app start + screen rendering traces
+    id 'com.google.firebase.appdistribution' // pushes Jenkins builds to field devices
+}
+
+// --- CI hooks --------------------------------------------------------------------
+// Jenkins binds the "Secret file" credential to this env var; the file is never in Git.
+def ciGoogleServices = System.getenv('GOOGLE_SERVICES_JSON')
+if (ciGoogleServices) {
+    file('google-services.json').bytes = new File(ciGoogleServices).bytes
+}
+def ciBuildNumber = (System.getenv('BUILD_NUMBER') ?: '1') as Integer
+def ciBranch = System.getenv('BRANCH_NAME') ?: 'local'
+
 android {
     namespace 'com.example.ecouganda'
     compileSdk 35
@@ -6,12 +21,45 @@ android {
         applicationId 'com.example.ecouganda'
         minSdk 23
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode ciBuildNumber
+        versionName "1.0.${ciBuildNumber}"
     }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField 'boolean', 'PERF_COLLECTION_ENABLED', 'true'
+            firebaseAppDistribution {
+                artifactType = 'APK'
+                groups = 'field-volunteers, warehouse-tablets'
+                releaseNotes = "Jenkins build ${ciBuildNumber} from ${ciBranch}"
+                if (System.getenv('FIREBASE_APP_DIST_SA')) {
+                    serviceCredentialsFile = System.getenv('FIREBASE_APP_DIST_SA')
+                }
+            }
+        }
+        release {
+            minifyEnabled false
+            buildConfigField 'boolean', 'PERF_COLLECTION_ENABLED', 'true'
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+
+    lint {
+        xmlReport true
+        htmlReport true
+        abortOnError false   // Jenkins Warnings NG quality gate decides pass/fail
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 
@@ -20,4 +68,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.core:core-splashscreen:1.2.0'
     implementation 'androidx.fragment:fragment:1.6.1'
+
+    implementation platform('com.google.firebase:firebase-bom:34.14.1')
+    implementation 'com.google.firebase:firebase-perf'
+
+    testImplementation 'junit:junit:4.13.2'
 }
