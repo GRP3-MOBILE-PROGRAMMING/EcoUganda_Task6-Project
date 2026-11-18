@@ -35,8 +35,9 @@ set APP_HOME=%DIRNAME%
 @rem Resolve any "." and ".." in APP_HOME to make it shorter.
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
-@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+@rem Add default JVM options here.
+@rem Added WINDOWS-ROOT trust store to fix SunCertPathBuilderException for the wrapper download.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m" "-Djavax.net.ssl.trustStoreType=WINDOWS-ROOT" "-Djavax.net.ssl.trustStore=NONE"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome

@@ -12,6 +12,7 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/dashboard_greeting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Good morning, Officer"
@@ -60,6 +61,7 @@
                         android:textSize="11sp"/>
 
                     <TextView
+                        android:id="@+id/stat_solar_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1,284"
@@ -67,6 +69,7 @@
                         android:textSize="25sp"/>
 
                     <TextView
+                        android:id="@+id/stat_solar_delta"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+12% this quarter"
@@ -104,6 +107,7 @@
                         android:textSize="11sp"/>
 
                     <TextView
+                        android:id="@+id/stat_acres_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="8,420"
@@ -111,6 +115,7 @@
                         android:textSize="25sp"/>
 
                     <TextView
+                        android:id="@+id/stat_acres_delta"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+640 acres this month"
@@ -147,6 +152,7 @@
                     android:textSize="11sp"/>
 
                 <TextView
+                    android:id="@+id/stat_co2_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="12.6k t"
@@ -154,6 +160,7 @@
                     android:textSize="25sp"/>
 
                 <TextView
+                    android:id="@+id/stat_co2_impact"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Estimated annual impact"
@@ -177,7 +184,9 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/bg_card"
             android:orientation="horizontal"
-            android:padding="12dp">
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true">
 
             <View
                 android:layout_width="4dp"
@@ -191,6 +200,7 @@
                 android:paddingStart="10dp">
 
                 <TextView
+                    android:id="@+id/alert_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Deforestation alert • Mabira Forest"
@@ -198,6 +208,7 @@
                     android:textSize="13sp"/>
 
                 <TextView
+                    android:id="@+id/alert_subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -206,6 +217,7 @@
                     android:textSize="10sp"/>
 
                 <TextView
+                    android:id="@+id/alert_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="7dp"
@@ -233,6 +245,7 @@
             android:padding="14dp">
 
             <TextView
+                android:id="@+id/featured_project_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Kiryandongo Solar Initiative"
@@ -255,6 +268,7 @@
                 android:layout_marginTop="10dp">
 
                 <ProgressBar
+                    android:id="@+id/featured_project_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="0dp"
                     android:layout_height="8dp"
@@ -265,6 +279,7 @@
                     android:progressBackgroundTint="#DDEDE0"/>
 
                 <TextView
+                    android:id="@+id/featured_project_percent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"

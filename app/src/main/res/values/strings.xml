@@ -57,4 +57,13 @@
     <string name="action">ACTION</string>
     <string name="wakiso_district">Wakiso District</string>
     <string name="wakiso_details">18 active projects · 1 open alert</string>
+
+    <!-- Professional Placeholder Strings -->
+    <string name="report_subtitle_format">%1$s District · Report %2$s · %3$s</string>
+    <string name="percent_format">%1$d%%</string>
+    <string name="toast_investigation_assigned">Investigation assigned for %1$s</string>
+    <string name="toast_opening_map">Opening map for %1$s</string>
+    <string name="officer_assigned_format">Officer assigned to %1$s</string>
+    <string name="project_details_format">%1$s · %2$s</string>
+    <string name="school_details_format">%1$s District · %2$d trees</string>
 </resources>

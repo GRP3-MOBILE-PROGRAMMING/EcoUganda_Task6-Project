@@ -7,4 +7,11 @@
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:windowBackground">@color/eco_background</item>
     </style>
+
+    <!-- Professional Splash Screen Theme using the exact application logo -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_eco_logo</item>
+        <item name="windowSplashScreenBackground">@color/eco_white</item>
+        <item name="postSplashScreenTheme">@style/Theme.EcoUganda</item>
+    </style>
 </resources>
