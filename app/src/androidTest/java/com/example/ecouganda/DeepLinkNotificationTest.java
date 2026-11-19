@@ -15,10 +15,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.SystemClock;
 
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
@@ -55,8 +58,17 @@ public class DeepLinkNotificationTest {
     private static final String REPORT_ID = "RPT-2041";          // not the default report
     private static final String REPORT_TITLE = "Illegal dumping near wetland";
     private static final long TIMEOUT_MS = 10_000;
+    private static final String SYSTEM_UI = "com.android.systemui";
 
     private ActivityScenario<MainActivity> scenario;
+
+    /**
+     * True when a second intent was delivered to the running MainActivity (onNewIntent).
+     * MainActivity calls setIntent() there, after which ActivityScenario no longer matches the
+     * activity to the intent it launched: it misses the DESTROYED event and close() times out
+     * after 45 s even though the activity really finished (seen on Test Lab API 30 and 34).
+     */
+    private boolean deliveredNewIntent;
 
     @Before
     public void grantNotificationPermission() {
@@ -68,8 +80,24 @@ public class DeepLinkNotificationTest {
 
     @After
     public void cleanUp() {
+        // A shade left open by a failed test keeps window focus away from the app, which made
+        // every later test on the device fail with RootViewWithoutFocusException (Test Lab API 26).
+        closeNotificationShade();
         NotificationManagerCompat.from(context()).cancelAll();
-        if (scenario != null) scenario.close();
+        if (scenario == null) return;
+        if (deliveredNewIntent) {
+            scenario.onActivity(Activity::finish);
+        } else {
+            scenario.close();
+        }
+    }
+
+    private static void closeNotificationShade() {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        for (int i = 0; i < 2 && device.hasObject(By.res(SYSTEM_UI, "notification_stack_scroller")); i++) {
+            device.pressBack();   // first press may only collapse quick settings
+            device.waitForIdle();
+        }
     }
 
     @Test
@@ -115,6 +143,7 @@ public class DeepLinkNotificationTest {
         onView(withId(R.id.screen_title)).check(matches(withText(R.string.dashboard_title)));
 
         // singleTop: delivered to onNewIntent of the running activity
+        deliveredNewIntent = true;
         context().startActivity(ReportNotifications.buildIntent(context(), REPORT_ID));
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -129,10 +158,18 @@ public class DeepLinkNotificationTest {
         scenario = ActivityScenario.launch(MainActivity.class);
         assertTrue(ReportNotifications.show(ctx, REPORT_ID, REPORT_TITLE, "Wakiso District - needs review"));
 
+        assertTrue("notification was not posted", waitUntilPosted(ctx));
+
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         device.openNotification();
-        UiObject2 notification = device.wait(Until.findObject(By.text(REPORT_TITLE)), TIMEOUT_MS);
+        UiObject2 notification = device.wait(Until.findObject(By.textContains(REPORT_TITLE)), TIMEOUT_MS);
+        if (notification == null) {
+            // Older shades (Android 8) can open only part-way on the first swipe
+            device.openNotification();
+            notification = device.wait(Until.findObject(By.textContains(REPORT_TITLE)), TIMEOUT_MS);
+        }
         assertNotNull("notification not visible in the shade", notification);
+        deliveredNewIntent = true; // the tap reaches the running activity via onNewIntent
         notification.click();
 
         // wait until the app is back in front and showing the report
@@ -140,6 +177,17 @@ public class DeepLinkNotificationTest {
         assertTrue(device.wait(Until.hasObject(By.textContains(REPORT_ID)), TIMEOUT_MS));
 
         assertReportShown(REPORT_ID);
+    }
+
+    /** The notification manager posts asynchronously; wait until ours is active before opening the shade. */
+    private static boolean waitUntilPosted(Context ctx) {
+        NotificationManager nm = ctx.getSystemService(NotificationManager.class);
+        long deadline = SystemClock.uptimeMillis() + TIMEOUT_MS;
+        while (SystemClock.uptimeMillis() < deadline) {
+            if (nm.getActiveNotifications().length > 0) return true;
+            SystemClock.sleep(100);
+        }
+        return false;
     }
 
     private void assertReportShown(String expectedId) {
