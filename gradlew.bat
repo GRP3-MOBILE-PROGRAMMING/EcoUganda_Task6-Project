@@ -36,8 +36,7 @@ set APP_HOME=%DIRNAME%
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here.
-@rem Added WINDOWS-ROOT trust store to fix SunCertPathBuilderException for the wrapper download.
-set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m" "-Djavax.net.ssl.trustStoreType=WINDOWS-ROOT" "-Djavax.net.ssl.trustStore=NONE"
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome

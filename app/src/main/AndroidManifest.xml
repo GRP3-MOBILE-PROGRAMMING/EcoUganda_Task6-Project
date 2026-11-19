@@ -2,8 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Lets performance traces tag network_type (wifi / cell_3g / cell_2g / offline) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
+        android:name=".EcoUgandaApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_eco_logo"
         android:roundIcon="@drawable/ic_eco_logo"
