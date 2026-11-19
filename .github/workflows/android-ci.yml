@@ -76,8 +76,8 @@ jobs:
       - name: Lint
         run: ./gradlew --stacktrace lintDebug -PfirebasePerformanceInstrumentationEnabled=$PERF_INSTRUMENTATION
 
-      - name: Build debug APK
-        run: ./gradlew --stacktrace assembleDebug -PfirebasePerformanceInstrumentationEnabled=$PERF_INSTRUMENTATION
+      - name: Build debug APK and device-test APK
+        run: ./gradlew --stacktrace assembleDebug assembleDebugAndroidTest -PfirebasePerformanceInstrumentationEnabled=$PERF_INSTRUMENTATION
 
       - name: Upload test and lint reports
         if: always()
@@ -93,7 +93,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/androidTest/debug/*.apk
           retention-days: 14
 
       - name: Remove copied Firebase config

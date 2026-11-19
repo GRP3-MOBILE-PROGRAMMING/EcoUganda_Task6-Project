@@ -2,6 +2,7 @@ package com.example.ecouganda;
 
 import android.app.Application;
 
+import com.example.ecouganda.notifications.ReportNotifications;
 import com.example.ecouganda.performance.PerfMonitor;
 
 public class EcoUgandaApp extends Application {
@@ -9,5 +10,6 @@ public class EcoUgandaApp extends Application {
     public void onCreate() {
         super.onCreate();
         PerfMonitor.init(this, BuildConfig.PERF_COLLECTION_ENABLED);
+        ReportNotifications.ensureChannel(this);
     }
 }

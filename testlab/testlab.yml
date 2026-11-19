@@ -1,0 +1,81 @@
+# =====================================================================================
+#  Firebase Test Lab device matrix for EcoUganda
+#
+#  Run a group with:
+#     gcloud firebase test android run testlab/testlab.yml:smoke
+#     gcloud firebase test android run testlab/testlab.yml:full
+#     gcloud firebase test android run testlab/testlab.yml:robo
+#  (build first:  gradlew assembleDebug assembleDebugAndroidTest)
+#
+#  Before the first run, confirm the model IDs and API levels still exist:
+#     gcloud firebase test android models list --filter=virtual
+#  An unknown model/version is rejected before any test starts and uses no quota.
+#
+#  Spark (free) plan budget: 10 virtual + 5 physical device runs per day.
+#    smoke = 3 runs, robo = 2 runs  -> fits every day (5 of 10)
+#    full  = 7 runs                 -> run it on its own day (or on the Blaze plan)
+#
+#  Arm virtual devices start at API 26. API 23-25 (the app's minSdk is 23) need
+#  physical devices: see the legacy-physical group at the bottom.
+# =====================================================================================
+
+# ---- shared settings for the Espresso / UI Automator suite --------------------------
+instrumentation-common:
+  type: instrumentation
+  app: app/build/outputs/apk/debug/app-debug.apk
+  test: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+  use-orchestrator: true                  # each test in its own process
+  environment-variables:
+    clearPackageData: "true"             # ...with a clean app state
+  num-flaky-test-attempts: 1             # one automatic retry before a test counts as failed
+  timeout: 20m
+  record-video: true
+  results-history-name: EcoUganda-device-tests
+
+# ---- SMOKE: every main build / manual run -------------------------------------------
+# One device per tier. Portrait start; the tests rotate to landscape themselves.
+smoke:
+  include: [instrumentation-common]
+  device:
+    - {model: SmallPhone.arm,  version: 30, locale: en, orientation: portrait}   # low-end, small screen
+    - {model: MediumPhone.arm, version: 26, locale: en, orientation: portrait}   # mid-range, oldest virtual API
+    - {model: MediumTablet.arm, version: 34, locale: en, orientation: portrait}  # 7-10" district HQ tablet
+
+# ---- FULL: nightly / before a release -----------------------------------------------
+# Adds API spread and landscape *starting* orientation (catches layouts that only
+# break when the app is launched in landscape, e.g. drawer items cut off).
+full:
+  include: [instrumentation-common]
+  device:
+    - {model: SmallPhone.arm,  version: 30, locale: en, orientation: portrait}
+    - {model: SmallPhone.arm,  version: 30, locale: en, orientation: landscape}
+    - {model: MediumPhone.arm, version: 26, locale: en, orientation: portrait}
+    - {model: MediumPhone.arm, version: 29, locale: en, orientation: landscape}
+    - {model: MediumPhone.arm, version: 34, locale: en, orientation: portrait}   # high-end phone, newest API in scope
+    - {model: MediumTablet.arm, version: 30, locale: en, orientation: landscape}
+    - {model: MediumTablet.arm, version: 34, locale: en, orientation: portrait}
+
+# ---- ROBO: automatic crawl for crashes, ANRs and UI problems --------------------------
+# No test code needed. Directives type into the search boxes so Robo exercises filtering.
+robo:
+  type: robo
+  app: app/build/outputs/apk/debug/app-debug.apk
+  timeout: 5m
+  record-video: true
+  results-history-name: EcoUganda-robo
+  robo-directives:
+    "text:search_projects": Kampala
+    "text:search_schools": Mukono
+  device:
+    - {model: SmallPhone.arm,  version: 30, locale: en, orientation: portrait}
+    - {model: MediumTablet.arm, version: 34, locale: en, orientation: landscape}
+
+# ---- LEGACY PHYSICAL: API 23-25 low-RAM phones (weekly, uses the 5 physical runs) -----
+# Pick real low-end devices from:  gcloud firebase test android models list --filter=physical
+# (the Firebase console shows RAM and screen size), then uncomment and fill in:
+#
+# legacy-physical:
+#   include: [instrumentation-common]
+#   device:
+#     - {model: <PHYSICAL_MODEL_ID_API23>, version: 23, locale: en, orientation: portrait}
+#     - {model: <PHYSICAL_MODEL_ID_API25>, version: 25, locale: en, orientation: portrait}

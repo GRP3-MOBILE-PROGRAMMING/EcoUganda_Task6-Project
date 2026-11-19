@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- true on 7-10" tablets (smallest width >= 600dp): drawer is a permanent sidebar -->
+    <bool name="is_tablet">true</bool>
+</resources>

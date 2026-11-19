@@ -28,3 +28,9 @@ docs/
 
 # Leftover copy of the extracted zip
 EcoUganda_Task6-Project/
+
+# Local-only work (Field Distribution demo data, QR cards) - never pushed
+field-data/
+
+# Unpacked hand-over folders
+EcoUganda_TestLab_changed_files/
