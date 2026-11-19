@@ -18,7 +18,7 @@ pipeline {
     agent { label 'android' }
 
     tools {
-        jdk 'jdk21'   // Manage Jenkins > Tools > JDK installations, name must match
+        jdk 'JDK21'   // Manage Jenkins > Tools > JDK installations, name must match
     }
 
     options {
