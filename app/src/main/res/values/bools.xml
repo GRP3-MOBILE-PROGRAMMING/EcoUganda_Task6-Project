@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- false on phones: navigation drawer hidden until the menu button is tapped -->
+    <bool name="is_tablet">false</bool>
+</resources>

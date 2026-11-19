@@ -66,4 +66,13 @@
     <string name="officer_assigned_format">Officer assigned to %1$s</string>
     <string name="project_details_format">%1$s · %2$s</string>
     <string name="school_details_format">%1$s District · %2$d trees</string>
+
+    <!-- Navigation drawer, deep links and notifications -->
+    <string name="cd_open_drawer">Open navigation drawer</string>
+    <string name="report_detail_title">Report Details</string>
+    <string name="report_id_format">REPORT ID  •  %1$s</string>
+    <string name="report_location_format">%1$s, %2$s District</string>
+    <string name="report_not_found">Report %1$s was not found</string>
+    <string name="notification_channel_reports">Field reports</string>
+    <string name="notification_channel_reports_desc">New environmental reports that need attention</string>
 </resources>

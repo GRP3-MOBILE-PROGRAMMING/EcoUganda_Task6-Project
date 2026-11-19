@@ -23,6 +23,11 @@ android {
         targetSdk 34
         versionCode ciBuildNumber
         versionName "1.0.${ciBuildNumber}"
+
+        // Instrumented (device) tests - run locally, on Firebase Test Lab and from Jenkins
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        // Orchestrator + clearPackageData: every test starts from a clean app state
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
     buildFeatures {
@@ -60,6 +65,8 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+        animationsDisabled = true
     }
 }
 
@@ -71,6 +78,16 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:34.14.1')
     implementation 'com.google.firebase:firebase-perf'
+    implementation 'com.google.firebase:firebase-messaging'   // push notifications -> report deep link
 
     testImplementation 'junit:junit:4.13.2'
+
+    // Device tests (src/androidTest): Espresso for UI, UI Automator for the notification shade
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+    androidTestUtil 'androidx.test:orchestrator:1.5.1'
 }

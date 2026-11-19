@@ -1,6 +1,7 @@
 package com.example.ecouganda;
 
-import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.graphics.Color;
 import android.view.View;
@@ -17,24 +18,44 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.ecouganda.models.Project;
 import com.example.ecouganda.models.Report;
 import com.example.ecouganda.models.School;
 import com.example.ecouganda.models.SustainabilityStats;
+import com.example.ecouganda.navigation.DeepLinks;
 import com.example.ecouganda.services.DataService;
+import com.example.ecouganda.ui.ReportsFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Main Activity for the EcoUganda application.
  * Handles navigation between screens and coordinates data between models and views.
+ *
+ * Navigation drawer: on phones it is hidden and opened from the menu button;
+ * on tablets (layout-sw600dp) it is a permanent sidebar. The selected item is
+ * highlighted and the toolbar title follows the current page.
+ *
+ * Deep links: ecouganda://reports/{reportId} (from push notifications) opens
+ * ReportsFragment with that reportId.
+ *
+ * State preservation: current page, report id and drawer state survive rotation.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity implements ReportsFragment.Host {
+
+    static final String STATE_PAGE = "current_page";
+    static final String STATE_REPORT_ID = "current_report_id";
+    static final String STATE_DRAWER_OPEN = "drawer_open";
 
     private String currentPage = "dashboard";
+    private String currentReportId;
     private View drawer;
     private View scrim;
     private DataService dataService;
@@ -57,9 +78,21 @@ public class MainActivity extends Activity {
         drawer = findViewById(R.id.mobile_drawer);
         scrim = findViewById(R.id.drawer_scrim);
 
-        // Restore state if returning from background
+        boolean reopenDrawer = false;
         if (state != null) {
-            currentPage = state.getString("current_page", "dashboard");
+            // Configuration change (rotation) or process restore
+            currentPage = state.getString(STATE_PAGE, "dashboard");
+            currentReportId = state.getString(STATE_REPORT_ID);
+            reopenDrawer = state.getBoolean(STATE_DRAWER_OPEN, false);
+        } else {
+            // Fresh launch: honour a deep link / notification tap
+            String deepLinkId = reportIdFrom(getIntent());
+            if (deepLinkId != null) {
+                currentPage = "report_detail";
+                currentReportId = deepLinkId;
+            } else if (isReportsListLink(getIntent())) {
+                currentPage = "reports";
+            }
         }
 
         // Setup Drawer Toggles
@@ -69,6 +102,40 @@ public class MainActivity extends Activity {
 
         bindNavigation();
         showPage(currentPage);
+        if (reopenDrawer) openDrawer();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String reportId = reportIdFrom(intent);
+        if (reportId != null) {
+            openReport(reportId);
+        } else if (isReportsListLink(intent)) {
+            showPage("reports");
+        }
+    }
+
+    /** Report id from ecouganda://reports/{id} or from the "reportId" extra (FCM tray tap). */
+    static String reportIdFrom(Intent intent) {
+        if (intent == null) return null;
+        Uri data = intent.getData();
+        if (data != null) {
+            String id = DeepLinks.parseReportId(data.getScheme(), data.getHost(), data.getPath());
+            if (id != null) return id;
+        }
+        return DeepLinks.normaliseReportId(intent.getStringExtra(DeepLinks.EXTRA_REPORT_ID));
+    }
+
+    private static boolean isReportsListLink(Intent intent) {
+        Uri data = intent == null ? null : intent.getData();
+        return data != null && DeepLinks.isReportsLink(data.getScheme(), data.getHost());
+    }
+
+    /** True on tablets (sw600dp), where the drawer is a permanent sidebar. */
+    public boolean isPermanentDrawer() {
+        return getResources().getBoolean(R.bool.is_tablet);
     }
 
     private void toggleDrawer() {
@@ -76,10 +143,19 @@ public class MainActivity extends Activity {
             if (drawer.getVisibility() == View.VISIBLE) {
                 closeDrawer();
             } else {
-                drawer.setVisibility(View.VISIBLE);
-                if (scrim != null) scrim.setVisibility(View.VISIBLE);
+                openDrawer();
             }
         }
+    }
+
+    private void openDrawer() {
+        if (drawer == null) return; // tablets: sidebar is always shown
+        drawer.setVisibility(View.VISIBLE);
+        if (scrim != null) scrim.setVisibility(View.VISIBLE);
+    }
+
+    private boolean isDrawerOpen() {
+        return drawer != null && drawer.getVisibility() == View.VISIBLE;
     }
 
     private void closeDrawer() {
@@ -109,10 +185,32 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    public void openReport(String reportId) {
+        String id = DeepLinks.normaliseReportId(reportId);
+        if (id == null || dataService.getReportById(id) == null) {
+            Toast.makeText(this, getString(R.string.report_not_found, String.valueOf(reportId)),
+                    Toast.LENGTH_SHORT).show();
+            showPage("reports");
+            return;
+        }
+        currentReportId = id;
+        showPage("report_detail");
+    }
+
+    @Override
+    public void showReportsList() {
+        showPage("reports");
+    }
+
     private void showPage(String page) {
+        if ("report_detail".equals(page)
+                && (currentReportId == null || dataService.getReportById(currentReportId) == null)) {
+            page = "reports"; // restored/deep-linked id no longer exists
+        }
         currentPage = page;
+        if (!"report_detail".equals(page)) currentReportId = null;
         closeDrawer();
-        updateBottomNavUI(page);
 
         int layoutRes;
         String title;
@@ -132,7 +230,7 @@ public class MainActivity extends Activity {
                 break;
             case "report_detail":
                 layoutRes = R.layout.fragment_report_detail;
-                title = "Report Details";
+                title = getString(R.string.report_detail_title);
                 break;
             case "settings":
                 layoutRes = R.layout.fragment_settings;
@@ -144,16 +242,62 @@ public class MainActivity extends Activity {
                 currentPage = "dashboard";
         }
 
+        updateBottomNavUI(currentPage);
+        updateDrawerHighlight(currentPage);
+
         // Update Screen Title
         TextView titleView = findViewById(R.id.screen_title);
         if (titleView != null) titleView.setText(title);
 
-        // Load Content into container
         FrameLayout container = findViewById(R.id.page_container);
-        if (container != null) {
-            container.removeAllViews();
-            LayoutInflater.from(this).inflate(layoutRes, container, true);
-            setupPageLogic(page, container);
+        if (container == null) return;
+
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment existing = fm.findFragmentById(R.id.page_container);
+
+        if ("reports".equals(page) || "report_detail".equals(page)) {
+            // Reports is a real Fragment so the reportId travels as a fragment argument.
+            String wanted = "report_detail".equals(page) ? currentReportId : null;
+            if (existing instanceof ReportsFragment
+                    && Objects.equals(((ReportsFragment) existing).getReportId(), wanted)) {
+                return; // already showing it (e.g. restored by the FragmentManager after rotation)
+            }
+            if (!(existing instanceof ReportsFragment)) {
+                container.removeAllViews(); // views of a layout-based page; fragments clean up themselves
+            }
+            fm.beginTransaction()
+                    .replace(R.id.page_container, ReportsFragment.newInstance(wanted), ReportsFragment.TAG)
+                    .commitNow();
+            return;
+        }
+
+        // Other pages are plain layouts inflated into the container
+        if (existing != null) {
+            fm.beginTransaction().remove(existing).commitNow();
+        }
+        container.removeAllViews();
+        LayoutInflater.from(this).inflate(layoutRes, container, true);
+        setupPageLogic(page, container);
+    }
+
+    /** Highlights the drawer item for the current page (both phone drawer and tablet sidebar). */
+    private void updateDrawerHighlight(String page) {
+        String key = "report_detail".equals(page) ? "reports" : page;
+        highlight(R.id.nav_dashboard, "dashboard".equals(key));
+        highlight(R.id.nav_projects, "projects".equals(key));
+        highlight(R.id.nav_schools, "schools".equals(key));
+        highlight(R.id.nav_reports, "reports".equals(key));
+        highlight(R.id.nav_settings, "settings".equals(key));
+    }
+
+    private void highlight(int id, boolean selected) {
+        View item = findViewById(id);
+        if (item == null) return;
+        item.setSelected(selected);
+        item.setActivated(selected);
+        item.setBackgroundColor(selected ? getColor(R.color.eco_green_soft) : Color.TRANSPARENT);
+        if (item instanceof TextView) {
+            ((TextView) item).setTextColor(getColor(selected ? R.color.eco_green : R.color.eco_text));
         }
     }
 
@@ -196,14 +340,6 @@ public class MainActivity extends Activity {
                 setupSearch(container.findViewById(R.id.search_schools), "schools", container);
                 break;
 
-            case "reports":
-                View reportItem = container.findViewById(R.id.report_mabira);
-                if (reportItem != null) reportItem.setOnClickListener(v -> showPage("report_detail"));
-                break;
-
-            case "report_detail":
-                populateReportDetail(container, "RPT-2048"); 
-                break;
         }
     }
 
@@ -232,7 +368,7 @@ public class MainActivity extends Activity {
         setText(container, R.id.featured_project_percent, getString(R.string.percent_format, topProject.getProgress()));
 
         View alert = container.findViewById(R.id.report_mabira);
-        if (alert != null) alert.setOnClickListener(v -> showPage("report_detail"));
+        if (alert != null) alert.setOnClickListener(v -> openReport(topReport.getId()));
     }
 
     private void populateProjects(FrameLayout container, List<Project> projects) {
@@ -294,22 +430,6 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void populateReportDetail(FrameLayout container, String reportId) {
-        Report report = dataService.getReportById(reportId);
-        if (report == null) return;
-
-        View backBtn = container.findViewById(R.id.btn_back_to_reports);
-        if (backBtn != null) backBtn.setOnClickListener(v -> showPage("reports"));
-        
-        View assignBtn = container.findViewById(R.id.assign_investigation);
-        if (assignBtn != null) assignBtn.setOnClickListener(v -> 
-            Toast.makeText(this, getString(R.string.toast_investigation_assigned, report.getId()), Toast.LENGTH_SHORT).show());
-        
-        View mapBtn = container.findViewById(R.id.view_location);
-        if (mapBtn != null) mapBtn.setOnClickListener(v -> 
-            Toast.makeText(this, getString(R.string.toast_opening_map, report.getLocation()), Toast.LENGTH_SHORT).show());
-    }
-
     private void loadProjectMap(FrameLayout container) {
         WebView map = container.findViewById(R.id.project_map);
         if (map != null) {
@@ -327,13 +447,15 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString("current_page", currentPage);
+        outState.putString(STATE_PAGE, currentPage);
+        outState.putString(STATE_REPORT_ID, currentReportId);
+        outState.putBoolean(STATE_DRAWER_OPEN, isDrawerOpen());
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onBackPressed() {
-        if (drawer != null && drawer.getVisibility() == View.VISIBLE) {
+        if (isDrawerOpen()) {
             closeDrawer();
         } else if ("report_detail".equals(currentPage)) {
             showPage("reports");
